@@ -1,6 +1,6 @@
 var express = require('express');
-var cookieParser = require('cookie-Parser');
-var bodyParser = require('body-Parser');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 var session = require('express-session');
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
@@ -9,9 +9,12 @@ var app = express();
 app.use(express.static('hompi'));
 app.use(express.static('hompi/Demo'));
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize('world', 'root', 'jhb30228',{
-  host: 'localhost',
+var sequelize = new Sequelize('mysql', 'root', '1234',{
+  //host: 'localhost',
   dialect: 'mysql',
+  define: {
+	timestamps: false
+	}		
 });
 
 var db = {};
