@@ -119,7 +119,7 @@ get(function (req, res,next) {
 	console.log("~!~!~!~!~!~!~!");
   console.log(req.body);
 	console.log("!@#!@#!@#");
-  console.log(req.parm.myonoffswitch);
+  console.log(req.body.onoffswitch);
   res.send('success');
 })
 
@@ -130,8 +130,7 @@ app.route('/register')
   }
   next();
 }).get(function(req, res, next) {
- console.log('>!@#!@#');
-  res.sendFile(__dirname + '/hompi/register2.html');
+  res.sendFile(__dirname + '/hompi/register.html');
 }).post(function(req, res, next) {
   var phone = req.body.phone_num;
   var password = req.body.password;
