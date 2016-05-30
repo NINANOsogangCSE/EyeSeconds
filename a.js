@@ -7,8 +7,10 @@ var session = require('express-session');
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
 var app = express();
-
-
+var onoff_flag=0;
+var flag1=0;
+var pre_1=0;
+var pre_3x,pre_3y,pre_3z=0;
 //////////////////////////////////////////////////
 var request=require("request");
 var crypto=require('crypto');
@@ -23,10 +25,10 @@ var salt= randomstring.generate(30);
 var signature = crypto.createHmac('md5',api_secret).update(timestamp+salt).digest('hex');
 var extension =[{
 type :'SMS',
-	 to : '01044436380',
-	 from : '01044436380',
-	 subject :'도난 상황 알림',
-	 text: '[Web 발신] NiNaNo\n 도난 방지 상황입니다'
+     to : '01044436380',
+     from : '01044436380',
+     subject :'도난 상황 알림',
+     text: '[Web 발신] NiNaNo\n 도난 방지 상황입니다'
 }];
 
 ////////////////////////////////////////////
@@ -72,13 +74,13 @@ len: [3, 20]
 },{
 instanceMethods: {
 checkPassword: function(password) {
-				   if (this.password === password) {
-					   return true;
-				   } else {
-					   return false;
-				   }
-			   }
-				 }
+		       if (this.password === password) {
+			       return true;
+		       } else {
+			       return false;
+		       }
+	       }
+		 }
 });
 sequelize.sync();
 
@@ -138,9 +140,29 @@ get(function (req, res,next) {
 		}).get(function(req, res, next) {
 			res.sendFile(__dirname+'/hompi/button.html');
 			}).post(function(req,res){
-				console.log(req.body.onoffswitch);
+				var abc=req.body.onoffswitch;
 
-				res.send('success');
+			//	console.log(req.body.onoffswitch);
+				if(abc=='true')
+				{
+					onoff_flag=1;
+					console.log(onoff_flag);
+				}
+				if(abc=='false')
+				{
+					onoff_flag=0;
+					console.log(onoff_flag);
+				}
+		/*		if(req.body.onoffswitch)
+				{
+					console.log("button::true");
+					onoff_flag=1;
+				}
+				if(!req.body.onoffswitch){
+					console.log("button:false");
+					onoff_flag=0;
+				}
+		*/		res.send('success');
 				})
 
 app.route('/register')
@@ -205,8 +227,75 @@ app.listen(3000, function () {
 ////////////////////////////////////////////////////////////////
 app.route('/notify')
 .get(function(req,res,next){
-		console.log(req._parsedOriginalUrl._raw);
-		res.send('hello');
+	//	console.log(req._parsedOriginalUrl._raw);
+		var ss=req._parsedOriginalUrl._raw.toString().split('?');
+		var sss=ss[1].split('\t');
+//		console.log(sss[0]+'<>,<<><<>><');
+		var threshold=150*150;
+		var total_acc =0;
+		var total_gy =0;
+		var total_dir=0;
+		console.log('>>>>>onoff_flag'+onoff_flag);
+		var flag_alarm=0;
+	//	console.log('가속도 계산전'+total_acc);
+		for(i=0; i<3; i++){
+			total_acc+=sss[i]*sss[i]
+		}
+	
+	//	console.log("가속도 :"+Math.sqrt(total_acc));
+	
+		var cur_1=Math.sqrt(total_acc);
+		// flag 설정
+		if(Math.abs(cur_1-pre_1) >50){
+			flag_alarm=1;
+		}
+	
+	//	console.log('이전값과 비교:'+  Math.abs(cur_1 - pre_1))
+	
+		pre_1=cur_1;
+					
+		if(flag1==0){
+			flag1=1;
+			flag_alarm=0;
+			prev_3x=sss[6];
+			prev_3y=sss[7];
+			prev_3z=sss[8];
+	
+		}		
+
+	///////////////////////////////////////////////////////////////////////////////////
+		for(i=3; i<6; i++){
+			total_gy+=sss[i]* sss[i];
+		}
+	
+
+		if(total_gy > 15*15){
+			console.log(">M>>>>>>");
+			flag_alarm=1;
+		}
+
+       /////////////////////////////////////////////////////////
+		total_dir+=(sss[6]-prev_3x)*(sss[6]-prev_3x);
+		total_dir+=(sss[7]-prev_3y)*(sss[7]-prev_3y);
+		total_dir+=(sss[8]-prev_3z)*(sss[8]-prev_3z);
+		
+		prev_3x=sss[6];
+		prev_3y=sss[7];
+		prev_3z=sss[8];
+	
+		if(total_dir > 35*35){
+			console.log( '>3rd>');
+			flag_alarm=1;
+		}
+		
+	///////////////////////////////////////////////////
+		console.log('total dir :' );
+			
+		if(onoff_flag==1 &&flag_alarm==1){
+			res.send('alarm');
+		}else{
+			res.send('stable');
+		}
 		next();
 		}).get(function(req,res,next){
 			//sendAPI();
