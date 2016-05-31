@@ -1,5 +1,4 @@
 process.env.TZ='Asia/Seoul'
-
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -8,6 +7,7 @@ var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
 var app = express();
 var onoff_flag=0;
+var alarm_flag=0;
 var flag1=0;
 var pre_1=0;
 var pre_3x,pre_3y,pre_3z=0;
@@ -113,7 +113,6 @@ passport.use(new LocalStrategy({
 usernameField: 'phone_num',
 passwordField: 'password',
 }, function(username, password, done) {
-console.log(username, password);
 db.User.findOne({
 where: {
 phone_num: username,
@@ -136,21 +135,24 @@ get(function (req, res,next) {
 		if (!req.user) {
 		return res.send('로그인을 하고 오세요');
 		}
+		console.log(req.user.phone_num+'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+		extension[0].to=req.user.phone_num;
 		next();
 		}).get(function(req, res, next) {
 			res.sendFile(__dirname+'/hompi/button.html');
 			}).post(function(req,res){
 				var abc=req.body.onoffswitch;
 
-			//	console.log(req.body.onoffswitch);
 				if(abc=='true')
 				{
+			        console.log('button on');	
 					onoff_flag=1;
 					console.log(onoff_flag);
 				}
 				if(abc=='false')
 				{
 					onoff_flag=0;
+					alarm_flag=0;
 					console.log(onoff_flag);
 				}
 				res.send('success');
@@ -198,13 +200,14 @@ failureRedirect: '/register' //위에서 res.send해서 리다이렉트 될 일�
 
 app.route('/')
 .get(function(req, res, next) {
-		console.log('in!');
-		console.log(req.user);
+		console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 		if (req.user) {
 		return res.send('이미 로그인을 했음');
 		}
 		next();
 		}).get(function(req, res, next) {
+		
+			console.log(extension);
 			res.sendFile(__dirname+'/hompi/Demo/index.html');
 			}).post(passport.authenticate('local', {
 successRedirect: '/button',
@@ -237,6 +240,10 @@ app.route('/notify')
 		var total_dir=0;
 		console.log('>>>>>onoff_flag'+onoff_flag);
 		var flag_alarm=0;
+		
+		console.log(sss);	
+		
+		
 		for(i=0; i<3; i++){
 			total_acc+=sss[i]*sss[i]
 		}
@@ -246,12 +253,13 @@ app.route('/notify')
 		// flag 설정
 		if(Math.abs(cur_1-pre_1) >50){
 			flag_alarm=1;
+			console.log('>>중력!!!<<');
 		}
 	
 	
 		pre_1=cur_1;
 					
-		if(flag1==0){
+		if(onoff_flag==0){
 			flag1=1;
 			flag_alarm=0;
 			prev_3x=sss[6];
@@ -267,7 +275,7 @@ app.route('/notify')
 	
 
 		if(total_gy > 15*15){
-			console.log(">M>>>>>>");
+			console.log(">>>자이로센서!!!>>>");
 			flag_alarm=1;
 		}
 
@@ -276,26 +284,31 @@ app.route('/notify')
 		total_dir+=(sss[7]-prev_3y)*(sss[7]-prev_3y);
 		total_dir+=(sss[8]-prev_3z)*(sss[8]-prev_3z);
 		
-		prev_3x=sss[6];
-		prev_3y=sss[7];
-		prev_3z=sss[8];
-	
-		if(total_dir > 35*35){
-			console.log( '>3rd>');
+		if(total_dir > 5*5){
+			console.log( '>>3rd SenSor');
 			flag_alarm=1;
 		}
 		
 	///////////////////////////////////////////////////
-		console.log('total dir :' );
-			
-		if(onoff_flag==1 &&flag_alarm==1){
+		
+		if ( alarm_flag==1)
+		{
 			res.send('alarm');
-		}else{
+		}
+		else if(onoff_flag==1 &&flag_alarm==1){
+			alarm_flag=1;
+			res.send('alarm');
+			console.log(extension[0].to+'에게 문자를 전송하겠습니다');
+			sendAPI();
+		}
+		
+		else{
+			console.log('stable');
 			res.send('stable');
 		}
 		next();
 		}).get(function(req,res,next){
-			//sendAPI();
+	//		sendAPI();
 			console.log('end get part of notify');
 			}).post(function(req,res){
 				console.log(3);
