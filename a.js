@@ -153,16 +153,7 @@ get(function (req, res,next) {
 					onoff_flag=0;
 					console.log(onoff_flag);
 				}
-		/*		if(req.body.onoffswitch)
-				{
-					console.log("button::true");
-					onoff_flag=1;
-				}
-				if(!req.body.onoffswitch){
-					console.log("button:false");
-					onoff_flag=0;
-				}
-		*/		res.send('success');
+				res.send('success');
 				})
 
 app.route('/register')
@@ -223,26 +214,33 @@ app.listen(3000, function () {
 		console.log('Example app listening on port 3000!');
 		});
 
+///////////////////////
+app.route('/chart')
+.get(function (req,res,next){
+
+	console.log('123');
+
+});
+
+
+
+
 
 ////////////////////////////////////////////////////////////////
 app.route('/notify')
 .get(function(req,res,next){
-	//	console.log(req._parsedOriginalUrl._raw);
 		var ss=req._parsedOriginalUrl._raw.toString().split('?');
 		var sss=ss[1].split('\t');
-//		console.log(sss[0]+'<>,<<><<>><');
 		var threshold=150*150;
 		var total_acc =0;
 		var total_gy =0;
 		var total_dir=0;
 		console.log('>>>>>onoff_flag'+onoff_flag);
 		var flag_alarm=0;
-	//	console.log('가속도 계산전'+total_acc);
 		for(i=0; i<3; i++){
 			total_acc+=sss[i]*sss[i]
 		}
 	
-	//	console.log("가속도 :"+Math.sqrt(total_acc));
 	
 		var cur_1=Math.sqrt(total_acc);
 		// flag 설정
@@ -250,7 +248,6 @@ app.route('/notify')
 			flag_alarm=1;
 		}
 	
-	//	console.log('이전값과 비교:'+  Math.abs(cur_1 - pre_1))
 	
 		pre_1=cur_1;
 					

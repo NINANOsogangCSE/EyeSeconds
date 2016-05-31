@@ -1,0 +1,82 @@
+<html>
+<head>
+    <!--Load the AJAX API-->
+    <script src="/bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      // Load the Visualization API and the corechart package.
+      google.charts.load('current', {'packages':['corechart']});
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        
+    	var hi= <%- JSON.stringify(hihi)%>;
+	data.addColumn('number', 'time');
+        data.addColumn('number','temperature');
+		var data2= new google.visualization.DataTable();
+	data2.addColumn('number', 'time');
+        data2.addColumn('number','temperature');
+	var data3= new google.visualization.DataTable();
+	data3.addColumn('number', 'time');
+        data3.addColumn('number','temperature');
+	for (var i =0; i<hi.length; i++)
+	{
+		if(hi[i].nextday ==0)
+			data.addRows([[hi[i].time,hi[i].temp]]);
+		else if(hi[i].nextday ==1)
+			data2.addRows([[hi[i].time,hi[i].temp]]);
+		else	
+			data3.addRows([[hi[i].time,hi[i].temp]]);
+	}
+        // Set chart options
+        var options = {'title':'CLIMATE',
+                       'width':800,
+                       'height':400,
+			'pointSize':20,
+			'hAxis' :{
+				minValue :0,
+				maxValue :25,
+				'title' :'시간'
+			},
+			'pointShape':'square',
+			'colors':['#e0440e']
+			};
+        // Instantiate and draw our chart, passing in some options.
+        
+var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        if(hi.length >16)
+		chart.draw(data, options);
+	  else 
+		chart.draw(data2, options); //24시~2시 사이의 데이터
+var chart2 = new google.visualization.LineChart(document.getElementById('chart_div2'));
+       if(hi.length >16)
+		  chart2.draw(data2, options);
+	else
+		  chart2.draw(data3, options);
+var chart3 = new google.visualization.LineChart(document.getElementById('chart_div3'));
+        if( hi.length > 16)
+		chart3.draw(data3, options);
+	else
+		chart3.draw(data,options) //just show empty graph 
+  }
+    </script>
+  </head>
+
+
+  <body>
+    <!--Div that will hold the pie chart-->
+   <h1>캡스톤 디자인 날씨 데이터  </h1> 
+   <h2> 현재 시각 :  <%= time %> </h2> 
+   <h3> 오늘 날씨 </h3>
+   <div id="chart_div"></div>
+   <h3> 내일 날씨 </h3>
+   <div id="chart_div2"></div>
+   <h3> 모레 날씨 </h3>
+   <div id="chart_div3"></div>
+</body>
+</html>
