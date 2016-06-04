@@ -1,9 +1,19 @@
 <HTML>
   <HEAD>
     <div align="center">
-    <IMG SRC="eyes2.png" WIDTH="1280" align="center"/>
+    <IMG SRC="eyes2.png" style="max-width:100%; margin:100px 0px;"/>
     </div>
     <style>
+#button {
+	width: 220px;
+	height: 155px;
+	position: absolute;
+	left: 50%;
+	top: 60%;
+	margin-left: -110px;
+	margin-top: -75px;
+
+}
     .onoffswitch {
     position: relative; width: 200px;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
@@ -52,7 +62,9 @@
     </style>
   </HEAD>
   <body>
-    <form name="button" method="post" action="/button">
+    <form name="button" id="button" method="post" action="/button">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
+	minimum-scale=0, user-scalable=no, target-densitydpi=medium-dpi"/>
     <div class="onoffswitch">
     <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" value=0>
     <label class="onoffswitch-label" for="myonoffswitch">
