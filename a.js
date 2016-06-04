@@ -134,7 +134,8 @@ app.route('/button').
 get(function (req, res,next) {
 		console.log('Accessing the secret section...\n');
 		if (!req.user) {
-		return res.send('로그인을 하고 오세요');
+			return res.redirect('/');
+		//return res.send('로그인을 하고 오세요');
 		}
 		next();
 		}).get(function(req, res, next) {
